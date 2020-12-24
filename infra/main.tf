@@ -29,6 +29,8 @@ resource "azurerm_app_service_plan" "appserviceplan" {
   name                = random_string.appsvcplan.result
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
+  kind                = "Linux"
+  reserved            = true
 
   sku {
     tier = "Free"
