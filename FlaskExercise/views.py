@@ -4,7 +4,7 @@ from FlaskExercise import app
 
 @app.route('/')
 def home():
-    log = request.values.get('log_button')
+    log = request.values.get('log_button', '')
 
     if log == "info":
         app.logger.info("home info")
