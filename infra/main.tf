@@ -45,7 +45,7 @@ resource "random_string" "appsvc" {
   upper   = false
 }
 
-resource "azurerm_app_service" "example" {
+resource "azurerm_app_service" "appsvc" {
   name                = random_string.appsvc.result
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
@@ -53,5 +53,56 @@ resource "azurerm_app_service" "example" {
 
   app_settings = {
     "SOME_KEY" = "some-value"
+  }
+
+  logs {
+    application_logs {
+      azure_blob_storage {
+        level = "Warning"
+        sas_url = format(
+          "%s/%s%s",
+          azurerm_storage_account.stacc.primary_blob_endpoint,
+          azurerm_storage_container.applicationlogs.name,
+          data.azurerm_storage_account_blob_container_sas.applicationlogs.sas
+        )
+        retention_in_days = 7
+      }
+    }
+  }
+}
+
+resource "azurerm_storage_account" "stacc" {
+  name                     = "l4monlogstoacc"
+  resource_group_name      = azurerm_resource_group.rg.name
+  location                 = azurerm_resource_group.rg.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+
+  tags = {
+    environment = "staging"
+  }
+}
+
+resource "azurerm_storage_container" "applicationlogs" {
+  name                  = "applicationlogs"
+  storage_account_name  = azurerm_storage_account.stacc.name
+  container_access_type = "private"
+}
+
+data "azurerm_storage_account_blob_container_sas" "applicationlogs" {
+  connection_string = azurerm_storage_account.stacc.primary_connection_string
+  container_name    = azurerm_storage_container.applicationlogs.name
+  https_only        = true
+
+  start  = "2020-12-25"
+  expiry = "2021-01-21"
+
+  permissions {
+    read   = true
+    add    = true
+    create = true
+    write  = true
+    delete = true
+    list   = true
   }
 }

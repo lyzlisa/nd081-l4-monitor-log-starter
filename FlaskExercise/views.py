@@ -6,9 +6,6 @@ from FlaskExercise import app
 def home():
     log = request.values.get('log_button')
 
-    if log not in ["info", "warning", "error", "critical"]:
-        return
-
     if log == "info":
         app.logger.info("home info")
     elif log == "warning":
