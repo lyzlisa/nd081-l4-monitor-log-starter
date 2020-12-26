@@ -14,8 +14,6 @@ def home():
         app.logger.error("home error")
     elif log == "critical":
         app.logger.critical("home critical")
-    else:
-        return Response(status=400)
 
     return render_template(
         'index.html',
